@@ -56,6 +56,7 @@ const TodayTag = styled.span`
   font-weight: 600;
   padding: 4px 8px;
   border-radius: 16px;
+  margin-left: 10px;
 `;
 
 const DayCardDate = styled.div`
