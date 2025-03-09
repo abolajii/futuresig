@@ -90,6 +90,8 @@ const Stats = ({ currency, isHidden, formatValue }) => {
     getSignalStats();
   }, []);
 
+  console.log(stats);
+
   const hideValue = (value) => {
     return isHidden ? "••••••" : value;
   };

@@ -29,10 +29,11 @@ export const getExpenses = async () => {
 
 export const getStats = async () => {
   try {
-    const response = await authSignal.get("/signal/stats");
+    const response = await authFuture.get("/signal/stats");
     return response.data;
   } catch (error) {
-    throw error.response.data;
+    console.log(error);
+    // throw error.response.data;
   }
 };
 
