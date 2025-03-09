@@ -3,6 +3,7 @@ import React, { useContext, useState } from "react";
 
 import styled from "styled-components";
 import { AuthContext } from "../../../context/AuthContext";
+import { getStats } from "../../../api/request";
 
 const StatsGrid = styled.div`
   display: grid;
@@ -75,18 +76,20 @@ const Stats = ({ currency, isHidden, formatValue }) => {
 
   const { currentUser: user } = useContext(AuthContext);
 
-  //   React.useEffect(() => {
-  //     const getSignalStats = async () => {
-  //       try {
-  //         const response = await getStats();
-  //         setStats(response);
-  //       } catch (error) {
-  //         console.error(error);
-  //         // TODO: Handle error
-  //       }
-  //     };
-  //     getSignalStats();
-  //   }, []);
+  React.useEffect(() => {
+    const getSignalStats = async () => {
+      try {
+        const response = await getStats();
+        console.log(response);
+        setStats(response);
+      } catch (error) {
+        console.error(error);
+        // TODO: Handle error
+      }
+    };
+    getSignalStats();
+  }, []);
+
   const hideValue = (value) => {
     return isHidden ? "••••••" : value;
   };
