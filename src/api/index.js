@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const prod = !true;
+const prod = true;
 
 const baseURL = prod
   ? "https://sigfuturebe.vercel.app/api/v1"
