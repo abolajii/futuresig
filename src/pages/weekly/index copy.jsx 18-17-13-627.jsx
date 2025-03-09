@@ -304,9 +304,7 @@ const Weekly = () => {
 
           <div className="daily">
             {result?.map((day, index) => {
-              // const isToday = day.date === new Date().split("T");
-              const isToday =
-                new Date(day.date).toDateString() === new Date().toDateString();
+              const isToday = day.date === new Date().split("T");
               const isExpanded = expandedDays[day.date] || false;
               const dayName = new Date(day.date).toLocaleDateString("en-US", {
                 weekday: "long",
@@ -330,149 +328,141 @@ const Weekly = () => {
               );
             })}
           </div>
-          <div className="two">
-            {weeklyData && (
+        </div>
+        <div className="two">
+          {weeklyData && (
+            <div
+              style={{
+                backgroundColor: "#1e1e1e",
+                borderRadius: "12px",
+                padding: "20px",
+                height: "fit-content",
+                display: "flex",
+                flexDirection: "column",
+                gap: "15px",
+                width: "100%",
+              }}
+            >
+              <h3 style={{ fontSize: "18px", marginBottom: "10px" }}>
+                Weekly Summary
+              </h3>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Starting Capital:</span>
+                <span>{formatAmount(weeklyData.startingCapital)}</span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Final Balance:</span>
+                <span>{formatAmount(weeklyData.lastWeekFinalCapital)}</span>
+              </div>
+
               <div
                 style={{
-                  backgroundColor: "#1e1e1e",
-                  borderRadius: "12px",
-                  padding: "20px",
-                  height: "fit-content",
                   display: "flex",
-                  flexDirection: "column",
-                  gap: "15px",
-                  width: "100%",
+                  justifyContent: "space-between",
+                  borderTop: "1px solid #2c2c2c",
+                  paddingTop: "10px",
                 }}
               >
-                <h3 style={{ fontSize: "18px", marginBottom: "10px" }}>
-                  Weekly Summary
-                </h3>
-
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span>Starting Capital:</span>
-                  <span>{formatAmount(weeklyData.startingCapital)}</span>
-                </div>
-
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span>Final Balance:</span>
-                  <span>{formatAmount(weeklyData.lastWeekFinalCapital)}</span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid #2c2c2c",
-                    paddingTop: "10px",
-                  }}
-                >
-                  <span>Signal 1 Profit:</span>
-                  <span style={{ color: "#4ade80" }}>
-                    {formatAmount(weeklyData.totalFirstSignalProfit)}
-                  </span>
-                </div>
-
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span>Signal 2 Profit:</span>
-                  <span style={{ color: "#4ade80" }}>
-                    {formatAmount(weeklyData.totalSecondSignalProfit)}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    backgroundColor: "#232323",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    marginTop: "5px",
-                  }}
-                >
-                  <span>Total Profit:</span>
-                  <span style={{ color: "#4ade80", fontWeight: "bold" }}>
-                    {formatAmount(weeklyData.totalSignalProfit)}
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid #2c2c2c",
-                    paddingTop: "10px",
-                    marginTop: "5px",
-                  }}
-                >
-                  <span>Deposits:</span>
-                  <span>
-                    {weeklyData.totalDeposits} (
-                    {formatAmount(
-                      weeklyData.deposits.reduce(
-                        (sum, deposit) => sum + deposit.amount,
-                        0
-                      )
-                    )}
-                    )
-                  </span>
-                </div>
-
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span>Withdrawals:</span>
-                  <span>
-                    {weeklyData.totalWithdrawals} (
-                    {formatAmount(
-                      weeklyData.withdrawals.reduce(
-                        (sum, withdrawal) => sum + withdrawal.amount,
-                        0
-                      )
-                    )}
-                    )
-                  </span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    backgroundColor: "#232323",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    marginTop: "10px",
-                  }}
-                >
-                  <span>Weekly Performance:</span>
-                  <span
-                    style={{
-                      color:
-                        weeklyData.lastWeekFinalCapital -
-                          weeklyData.startingCapital >
-                        0
-                          ? "#4ade80"
-                          : "#ef4444",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    {(
-                      (weeklyData.lastWeekFinalCapital /
-                        weeklyData.startingCapital -
-                        1) *
-                      100
-                    ).toFixed(2)}
-                    %
-                  </span>
-                </div>
+                <span>Signal 1 Profit:</span>
+                <span style={{ color: "#4ade80" }}>
+                  {formatAmount(weeklyData.totalFirstSignalProfit)}
+                </span>
               </div>
-            )}
-          </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Signal 2 Profit:</span>
+                <span style={{ color: "#4ade80" }}>
+                  {formatAmount(weeklyData.totalSecondSignalProfit)}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  backgroundColor: "#232323",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  marginTop: "5px",
+                }}
+              >
+                <span>Total Profit:</span>
+                <span style={{ color: "#4ade80", fontWeight: "bold" }}>
+                  {formatAmount(weeklyData.totalSignalProfit)}
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  borderTop: "1px solid #2c2c2c",
+                  paddingTop: "10px",
+                  marginTop: "5px",
+                }}
+              >
+                <span>Deposits:</span>
+                <span>
+                  {weeklyData.totalDeposits} (
+                  {formatAmount(
+                    weeklyData.deposits.reduce(
+                      (sum, deposit) => sum + deposit.amount,
+                      0
+                    )
+                  )}
+                  )
+                </span>
+              </div>
+
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Withdrawals:</span>
+                <span>
+                  {weeklyData.totalWithdrawals} (
+                  {formatAmount(
+                    weeklyData.withdrawals.reduce(
+                      (sum, withdrawal) => sum + withdrawal.amount,
+                      0
+                    )
+                  )}
+                  )
+                </span>
+              </div>
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  backgroundColor: "#232323",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  marginTop: "10px",
+                }}
+              >
+                <span>Weekly Performance:</span>
+                <span
+                  style={{
+                    color:
+                      weeklyData.lastWeekFinalCapital -
+                        weeklyData.startingCapital >
+                      0
+                        ? "#4ade80"
+                        : "#ef4444",
+                    fontWeight: "bold",
+                  }}
+                >
+                  {(
+                    (weeklyData.lastWeekFinalCapital /
+                      weeklyData.startingCapital -
+                      1) *
+                    100
+                  ).toFixed(2)}
+                  %
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       </Body>
     </Container>
