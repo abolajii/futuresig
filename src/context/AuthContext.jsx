@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
-import { logInDashboard } from "../api/request";
+import { logInDashboard, verifyMe } from "../api/request";
 
 export const AuthContext = createContext();
 
@@ -22,20 +22,22 @@ export const AuthProvider = ({ children }) => {
       if (accessToken) {
         try {
           console.log("Sending request to /api/v1/auth/verify endpoint");
-          const response = await axios.post(
-            "http://localhost:4300/api/v1/auth/verify",
-            {
-              accessToken,
-              refreshToken,
-            },
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            }
-          );
+
+          const response = await verifyMe();
+          // const response = await axios.post(
+          //   "http://localhost:4300/api/v1/auth/verify",
+          //   {
+          //     accessToken,
+          //     refreshToken,
+          //   },
+          //   {
+          //     headers: {
+          //       Authorization: `Bearer ${accessToken}`,
+          //     },
+          //   }
+          // );
           console.log("User data received:", response.data);
-          setCurrentUser(response.data.user);
+          setCurrentUser(response.user);
         } catch (error) {
           console.error("Error checking user status", error);
           console.log(
