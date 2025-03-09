@@ -1,4 +1,13 @@
-import { authFuture } from ".";
+import { authFuture, noauthFuture } from ".";
+
+export const logInDashboard = async (data) => {
+  try {
+    const response = await noauthFuture.post("/login", data);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
 
 export const getRevenue = async () => {
   try {

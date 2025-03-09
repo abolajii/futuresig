@@ -116,6 +116,7 @@ const Login = () => {
       navigate("/dashboard");
     } catch (error) {
       setServerError("Failed to login. Please check your credentials.");
+      setLoading(false);
     }
   };
 

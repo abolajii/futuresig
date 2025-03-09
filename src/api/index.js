@@ -1,15 +1,26 @@
 import axios from "axios";
 
+const prod = !true;
+
+const baseURL = prod
+  ? "https://sigfuturebe.vercel.app/api/v1"
+  : "http://localhost:4300/api/v1";
+
+const getToken = () => {
+  return localStorage.getItem("accessToken");
+};
+
 // Create axios instances
 const authFuture = axios.create({
-  baseURL: "http://localhost:4300/api/v1",
+  baseURL,
   headers: {
     "Content-Type": "application/json",
+    Authorization: `Bearer ${getToken()}`,
   },
 });
 
 const noauthFuture = axios.create({
-  baseURL: "http://localhost:4300/api/v1",
+  baseURL,
   headers: {
     "Content-Type": "application/json",
   },

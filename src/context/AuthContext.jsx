@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { logInDashboard } from "../api/request";
 
 export const AuthContext = createContext();
 
@@ -52,17 +53,22 @@ export const AuthProvider = ({ children }) => {
     checkUser();
   }, []);
 
-  const login = async (username, password) => {
+  const login = async (email, password) => {
+    const data = {
+      email,
+      password,
+    };
     try {
-      const response = await axios.post("http://localhost:4300/api/v1/login", {
-        email: username,
-        password,
-      });
+      const response = await logInDashboard(data);
+      // const response = await axios.post("http://localhost:4300/api/v1/login", {
+      //   email: username,
+      //   password,
+      // });
 
-      localStorage.setItem("accessToken", response.data.accessToken);
-      localStorage.setItem("refreshToken", response.data.refreshToken);
-      setCurrentUser(response.data.user);
-      return response.data.user;
+      localStorage.setItem("accessToken", response.accessToken);
+      localStorage.setItem("refreshToken", response.refreshToken);
+      setCurrentUser(response.user);
+      return response.user;
     } catch (error) {
       console.error("Login error", error);
       throw error;
