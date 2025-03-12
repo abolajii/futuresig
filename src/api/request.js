@@ -50,3 +50,13 @@ export const verifyMe = async () => {
     throw error.response.data;
   }
 };
+
+export const getSignalForTheDay = async () => {
+  try {
+    const response = await authFuture.get("/signal");
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    // throw error.response.data;
+  }
+};

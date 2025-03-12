@@ -7,9 +7,12 @@ import {
   ChevronRight,
   Clock,
 } from "react-feather";
-import { generateWeeklyDays } from "../../utils";
+import { addOneDay, generateWeeklyDays } from "../../utils";
 import { AuthContext } from "../../context/AuthContext";
 import DailyCard from "./components/DailyCard";
+import HistoricalDashboard from "./components/Historical";
+import ExpenseTracker from "./components/Expense";
+import ExpenseForm from "./components/ExpenseForm";
 
 const Container = styled.div`
   background-color: #121212;
@@ -60,6 +63,7 @@ const Body = styled.div`
     flex: 1;
     display: flex;
     margin-top: 20px;
+    flex-direction: column;
   }
 `;
 
@@ -144,14 +148,13 @@ const ToggleContainer = styled.div`
 `;
 
 const Weekly = () => {
-  const [weekOffset, setWeekOffset] = useState(0);
   const [weeklyData, setWeeklyData] = useState(null);
   const { currentUser } = useContext(AuthContext);
   const [expandedDays, setExpandedDays] = useState({});
-  const [currentWeekTotal, setCurrentWeekTotal] = useState(0);
-  const [nextWeekTotal, setNextWeekTotal] = useState(0);
-
-  const difference = currentWeekTotal - nextWeekTotal;
+  const [lastWeekFinalCapital, setLastWeekFinalCapital] = useState(0);
+  const [lastWeekStartingCapital, setLastWeekStartingCapital] = useState(0);
+  const [lastWeekDate, setLastWeekDate] = useState(0);
+  const [historicalWeeks, setHistoricalWeeks] = useState({});
 
   const [currency, setCurrency] = useState("USD");
 
@@ -166,16 +169,131 @@ const Weekly = () => {
     return `${currency === "NGN" ? "₦" : "$"}${formattedAmount}`;
   };
 
+  console.log(historicalWeeks);
+
+  // In goToPreviousWeek function
   const goToPreviousWeek = () => {
-    setWeekOffset(weekOffset - 1);
+    // Get the current week's start date
+    const currentWeekStartDate = weeklyData.weekStartDate;
+
+    // Calculate the previous week's start date (7 days before)
+    const previousWeekStartDate = new Date(currentWeekStartDate);
+    previousWeekStartDate.setDate(previousWeekStartDate.getDate() - 7);
+    const previousWeekStartKey = previousWeekStartDate
+      .toISOString()
+      .split("T")[0];
+
+    // Check if we have data for the previous week
+    if (historicalWeeks[previousWeekStartKey]) {
+      // If we have historical data, use that
+      const previousWeekData = historicalWeeks[previousWeekStartKey];
+
+      const result =
+        generateWeeklyDays(
+          previousWeekData.startingCapital,
+          new Date(previousWeekData.weekStartDate),
+          [],
+          []
+        ) || [];
+
+      setWeeklyData(result);
+      setLastWeekFinalCapital(result.lastWeekFinalCapital);
+      setLastWeekStartingCapital(result.lastWeekStartingCapital);
+      setLastWeekDate(result.lastWeekEndDate);
+    } else {
+      // If no historical data, generate new data
+      const result =
+        generateWeeklyDays(lastWeekStartingCapital, lastWeekDate, [], []) || [];
+      setWeeklyData(result);
+      setLastWeekFinalCapital(result.lastWeekFinalCapital);
+      setLastWeekStartingCapital(result.lastWeekStartingCapital);
+      setLastWeekDate(result.lastWeekEndDate);
+
+      // Add this new week to historical data
+      setHistoricalWeeks((prevHistorical) => ({
+        ...prevHistorical,
+        [result.weekStartDate]: {
+          startingCapital: result.startingCapital,
+          finalCapital: result.lastWeekFinalCapital,
+          weekStartDate: result.weekStartDate,
+          weekEndDate: result.lastWeekEndDate,
+        },
+      }));
+    }
   };
 
   const goToCurrentWeek = () => {
-    setWeekOffset(0);
+    const result =
+      generateWeeklyDays(currentUser.weekly_capital, new Date(), [], []) || [];
+    setWeeklyData(result);
+    setLastWeekFinalCapital(result.lastWeekFinalCapital);
+    setLastWeekStartingCapital(result.lastWeekStartingCapital);
+    setLastWeekDate(result.lastWeekEndDate);
+
+    // Set historical weeks to only contain the current week
+    const newHistoricalWeeks = {
+      [result.weekStartDate]: {
+        startingCapital: result.startingCapital,
+        finalCapital: result.lastWeekFinalCapital,
+        weekStartDate: result.weekStartDate,
+        weekEndDate: result.lastWeekEndDate,
+      },
+    };
+
+    setHistoricalWeeks(newHistoricalWeeks);
   };
 
   const goToNextWeek = () => {
-    setWeekOffset(weekOffset + 1);
+    // Get the current week's start date
+    const currentWeekStartDate = weeklyData.weekStartDate;
+
+    // Calculate the next week's start date (7 days after)
+    const nextWeekStartDate = new Date(currentWeekStartDate);
+    nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 7);
+    const nextWeekStartKey = nextWeekStartDate.toISOString().split("T")[0];
+
+    // Check if we have data for the next week
+    if (historicalWeeks[nextWeekStartKey]) {
+      // If we have historical data, use that
+      const nextWeekData = historicalWeeks[nextWeekStartKey];
+      const result =
+        generateWeeklyDays(
+          nextWeekData.startingCapital,
+          new Date(nextWeekData.weekStartDate),
+          [],
+          []
+        ) || [];
+
+      setWeeklyData(result);
+      setLastWeekFinalCapital(result.lastWeekFinalCapital);
+      setLastWeekStartingCapital(result.lastWeekStartingCapital);
+      setLastWeekDate(result.lastWeekEndDate);
+    } else {
+      // If no historical data, generate new data
+      const result =
+        generateWeeklyDays(
+          lastWeekFinalCapital,
+          addOneDay(lastWeekDate),
+          [],
+          []
+        ) || [];
+
+      setWeeklyData(result);
+      setLastWeekFinalCapital(result.lastWeekFinalCapital);
+      setLastWeekStartingCapital(result.lastWeekStartingCapital);
+      setLastWeekDate(result.lastWeekEndDate);
+
+      // Add this new week to historical data
+      setHistoricalWeeks((prevHistorical) => ({
+        ...prevHistorical,
+        [result.weekStartDate]: {
+          startingCapital: result.startingCapital,
+          finalCapital: result.lastWeekFinalCapital,
+          weekStartDate: result.weekStartDate,
+          weekEndDate: result.lastWeekEndDate,
+        },
+      }));
+    }
   };
 
   function formatDate(dateString) {
@@ -221,34 +339,27 @@ const Weekly = () => {
   const formattedStartDate = formatDate(weeklyData?.weekdays[0]?.date);
   const formattedEndDate = formatDate(weeklyData?.weekdays[6]?.date);
 
+  console.log(weeklyData);
+
   useEffect(() => {
-    if (weekOffset === 0) {
-      const result =
-        generateWeeklyDays(currentUser.weekly_capital, new Date(), [], []) ||
-        [];
-      setWeeklyData(result);
-    }
-    if (weekOffset > 0) {
-      // For next week, we use the lastWeek data as the starting point
-      const nextWeekCapital = weeklyData?.lastWeekFinalCapital;
-      const nextWeekDate = new Date();
-      nextWeekDate.setDate(nextWeekDate.getDate() + weekOffset * 7);
+    const result =
+      generateWeeklyDays(currentUser.weekly_capital, new Date(), [], []) || [];
+    setWeeklyData(result);
+    setLastWeekFinalCapital(result.lastWeekFinalCapital);
+    setLastWeekStartingCapital(result.lastWeekStartingCapital);
+    setLastWeekDate(result.lastWeekEndDate);
 
-      const result =
-        generateWeeklyDays(nextWeekCapital, nextWeekDate, [], []) || [];
-      setWeeklyData(result);
-    }
+    const initialHistorical = {
+      [result.weekStartDate]: {
+        startingCapital: result.startingCapital,
+        finalCapital: result.lastWeekFinalCapital,
+        weekStartDate: result.weekStartDate,
+        weekEndDate: result.lastWeekEndDate,
+      },
+    };
 
-    if (weekOffset < 0) {
-      const prevWeekCapital = initialWeeklyCapital - Math.abs(weekOffset) * 100; // Just for demo
-      const prevWeekDate = new Date();
-      prevWeekDate.setDate(prevWeekDate.getDate() + weekOffset * 7);
-
-      const result =
-        generateWeeklyDays(prevWeekCapital, prevWeekDate, [], []) || [];
-      setWeeklyData(result);
-    }
-  }, [weekOffset]);
+    setHistoricalWeeks(initialHistorical);
+  }, []);
 
   const dateRange = `${formattedStartDate} - ${formattedEndDate}`;
   return (
@@ -286,15 +397,10 @@ const Weekly = () => {
             </div>
             <div>
               <NavigationButtons>
-                <NavButton
-                  onClick={goToPreviousWeek}
-                  disabled={weekOffset === 0}
-                >
+                <NavButton onClick={goToPreviousWeek}>
                   <ChevronLeft size={18} /> Previous Week
                 </NavButton>
-                {weekOffset !== 0 && (
-                  <NavButton onClick={goToCurrentWeek}>Current Week</NavButton>
-                )}
+                <NavButton onClick={goToCurrentWeek}>Current Week</NavButton>
                 <NavButton onClick={goToNextWeek}>
                   Next Week <ChevronRight size={18} />
                 </NavButton>
@@ -333,140 +439,160 @@ const Weekly = () => {
         </div>
         <div className="two">
           {weeklyData && (
-            <div
-              style={{
-                backgroundColor: "#1e1e1e",
-                borderRadius: "12px",
-                padding: "20px",
-                height: "fit-content",
-                display: "flex",
-                flexDirection: "column",
-                gap: "15px",
-                width: "100%",
-              }}
-            >
-              <h3 style={{ fontSize: "18px", marginBottom: "10px" }}>
-                Weekly Summary
-              </h3>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Starting Capital:</span>
-                <span>{formatAmount(weeklyData.startingCapital)}</span>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Final Balance:</span>
-                <span>{formatAmount(weeklyData.lastWeekFinalCapital)}</span>
-              </div>
-
+            <>
               <div
                 style={{
+                  backgroundColor: "#1e1e1e",
+                  borderRadius: "12px",
+                  padding: "20px",
+                  height: "fit-content",
                   display: "flex",
-                  justifyContent: "space-between",
-                  borderTop: "1px solid #2c2c2c",
-                  paddingTop: "10px",
+                  flexDirection: "column",
+                  gap: "15px",
+                  width: "100%",
                 }}
               >
-                <span>Signal 1 Profit:</span>
-                <span style={{ color: "#4ade80" }}>
-                  {formatAmount(weeklyData.totalFirstSignalProfit)}
-                </span>
-              </div>
+                <h3 style={{ fontSize: "18px", marginBottom: "10px" }}>
+                  Weekly Summary
+                </h3>
 
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Signal 2 Profit:</span>
-                <span style={{ color: "#4ade80" }}>
-                  {formatAmount(weeklyData.totalSecondSignalProfit)}
-                </span>
-              </div>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span>Starting Capital:</span>
+                  <span>{formatAmount(weeklyData.startingCapital)}</span>
+                </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  backgroundColor: "#232323",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  marginTop: "5px",
-                }}
-              >
-                <span>Total Profit:</span>
-                <span style={{ color: "#4ade80", fontWeight: "bold" }}>
-                  {formatAmount(weeklyData.totalSignalProfit)}
-                </span>
-              </div>
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span>Final Balance:</span>
+                  <span>{formatAmount(weeklyData.lastWeekFinalCapital)}</span>
+                </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderTop: "1px solid #2c2c2c",
-                  paddingTop: "10px",
-                  marginTop: "5px",
-                }}
-              >
-                <span>Deposits:</span>
-                <span>
-                  {weeklyData.totalDeposits} (
-                  {formatAmount(
-                    weeklyData.deposits.reduce(
-                      (sum, deposit) => sum + deposit.amount,
-                      0
-                    )
-                  )}
-                  )
-                </span>
-              </div>
-
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span>Withdrawals:</span>
-                <span>
-                  {weeklyData.totalWithdrawals} (
-                  {formatAmount(
-                    weeklyData.withdrawals.reduce(
-                      (sum, withdrawal) => sum + withdrawal.amount,
-                      0
-                    )
-                  )}
-                  )
-                </span>
-              </div>
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  backgroundColor: "#232323",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  marginTop: "10px",
-                }}
-              >
-                <span>Weekly Performance:</span>
-                <span
+                <div
                   style={{
-                    color:
-                      weeklyData.lastWeekFinalCapital -
-                        weeklyData.startingCapital >
-                      0
-                        ? "#4ade80"
-                        : "#ef4444",
-                    fontWeight: "bold",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderTop: "1px solid #2c2c2c",
+                    paddingTop: "10px",
                   }}
                 >
-                  {(
-                    (weeklyData.lastWeekFinalCapital /
-                      weeklyData.startingCapital -
-                      1) *
-                    100
-                  ).toFixed(2)}
-                  %
-                </span>
+                  <span>Signal 1 Profit:</span>
+                  <span style={{ color: "#4ade80" }}>
+                    {formatAmount(weeklyData.totalFirstSignalProfit)}
+                  </span>
+                </div>
+
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span>Signal 2 Profit:</span>
+                  <span style={{ color: "#4ade80" }}>
+                    {formatAmount(weeklyData.totalSecondSignalProfit)}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    backgroundColor: "#232323",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    marginTop: "5px",
+                  }}
+                >
+                  <span>Total Profit:</span>
+                  <span style={{ color: "#4ade80", fontWeight: "bold" }}>
+                    {formatAmount(weeklyData.totalSignalProfit)}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderTop: "1px solid #2c2c2c",
+                    paddingTop: "10px",
+                    marginTop: "5px",
+                  }}
+                >
+                  <span>Deposits:</span>
+                  <span>
+                    {weeklyData.totalDeposits} (
+                    {formatAmount(
+                      weeklyData.deposits.reduce(
+                        (sum, deposit) => sum + deposit.amount,
+                        0
+                      )
+                    )}
+                    )
+                  </span>
+                </div>
+
+                <div
+                  style={{ display: "flex", justifyContent: "space-between" }}
+                >
+                  <span>Withdrawals:</span>
+                  <span>
+                    {weeklyData.totalWithdrawals} (
+                    {formatAmount(
+                      weeklyData.withdrawals.reduce(
+                        (sum, withdrawal) => sum + withdrawal.amount,
+                        0
+                      )
+                    )}
+                    )
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    backgroundColor: "#232323",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    marginTop: "10px",
+                  }}
+                >
+                  <span>Weekly Performance:</span>
+                  <span
+                    style={{
+                      color:
+                        weeklyData.lastWeekFinalCapital -
+                          weeklyData.startingCapital >
+                        0
+                          ? "#4ade80"
+                          : "#ef4444",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {(
+                      (weeklyData.lastWeekFinalCapital /
+                        weeklyData.startingCapital -
+                        1) *
+                      100
+                    ).toFixed(2)}
+                    %
+                  </span>
+                </div>
               </div>
-            </div>
+              <div style={{ marginTop: "20px", width: "100%" }}>
+                {/* <HistoricalDashboard
+                  weeklyData={weeklyData}
+                  historicalWeeks={historicalWeeks}
+                  formatAmount={formatAmount}
+                  currency={currency}
+                /> */}
+              </div>
+            </>
           )}
         </div>
       </Body>
+      {/* <ExpenseForm /> */}
+      {/* <ExpenseTracker /> */}
     </Container>
   );
 };

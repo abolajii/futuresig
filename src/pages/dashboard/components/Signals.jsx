@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { getSignalForTheDay } from "../../../api/request";
 
 const WidgetGrid = styled.div`
   display: grid;
@@ -119,53 +120,53 @@ const Signals = ({ signals: propSignals, setSignals: propSetSignals }) => {
       // Use signals passed from parent if available
       setSignals(propSignals);
       setLoading(false);
-      // fetchSignals();
+      fetchSignals();
     } else {
       // Otherwise fetch signals from the API
-      // fetchSignals();
+      fetchSignals();
     }
   }, []);
 
-  // const fetchSignals = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const response = await getSignalForTheDay();
-  //     console.log("running");
-  //     if (response && response.signals) {
-  //       const formattedSignals = response.signals.map((signal) => {
-  //         // Parse the datetime string properly
-  //         const [datePart, startTime, , endTime] = signal.time.split(" ");
-  //         const [startHour, startMinute] = startTime.split(":").map(Number);
-  //         const [endHour, endMinute] = endTime.split(":").map(Number);
+  const fetchSignals = async () => {
+    try {
+      setLoading(true);
+      const response = await getSignalForTheDay();
+      console.log("running");
+      if (response && response.signals) {
+        const formattedSignals = response.signals.map((signal) => {
+          // Parse the datetime string properly
+          const [datePart, startTime, , endTime] = signal.time.split(" ");
+          const [startHour, startMinute] = startTime.split(":").map(Number);
+          const [endHour, endMinute] = endTime.split(":").map(Number);
 
-  //         return {
-  //           ...signal,
-  //           id: signal._id,
-  //           title: signal.title || `Signal ${signal.id}`,
-  //           time: `${startTime} - ${endTime}`,
-  //           originalDate: datePart,
-  //           startHour,
-  //           startMinute,
-  //           endHour,
-  //           endMinute,
-  //           status: signal.status || "not-started",
-  //           traded: signal.traded || false,
-  //           capitalUpdated: signal.capitalUpdated || false,
-  //           hasNotification: false,
-  //         };
-  //       });
-  //       setSignals(formattedSignals);
-  //       if (propSetSignals) {
-  //         propSetSignals(formattedSignals);
-  //       }
-  //     }
-  //   } catch (err) {
-  //     setError("Failed to fetch signals");
-  //     console.error(err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+          return {
+            ...signal,
+            id: signal._id,
+            title: signal.title || `Signal ${signal.id}`,
+            time: `${startTime} - ${endTime}`,
+            originalDate: datePart,
+            startHour,
+            startMinute,
+            endHour,
+            endMinute,
+            status: signal.status || "not-started",
+            traded: signal.traded || false,
+            capitalUpdated: signal.capitalUpdated || false,
+            hasNotification: false,
+          };
+        });
+        setSignals(formattedSignals);
+        if (propSetSignals) {
+          propSetSignals(formattedSignals);
+        }
+      }
+    } catch (err) {
+      setError("Failed to fetch signals");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return <div style={{ color: "#f9fafb" }}>Loading signals...</div>;

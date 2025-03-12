@@ -107,6 +107,120 @@ export const calculateDayProfits = (
   };
 };
 
+// export const generateWeeklyDays = (
+//   capital,
+//   date = new Date(),
+//   deposits = [],
+//   withdrawals = []
+// ) => {
+//   const today = new Date(date);
+//   const currentDay = today.getDay(); // Get the current day index (0-6)
+//   const daysFromSunday = currentDay; // How far today is from Sunday
+
+//   const startOfWeek = new Date(today);
+//   startOfWeek.setDate(today.getDate() - daysFromSunday); // Move back to Sunday
+
+//   let runningCapital = capital;
+//   let lastWeekEndDate;
+//   let lastWeekFinalCapital;
+//   let lastWeekStartingCapital;
+
+//   // For tracking historical data between weeks
+//   const weekStartDate = formatDate(startOfWeek);
+
+//   const weekdays = [];
+
+//   for (let i = 0; i < 7; i++) {
+//     const day = new Date(startOfWeek);
+//     day.setDate(startOfWeek.getDate() + i);
+
+//     const currentDateString = formatDate(day);
+
+//     // Find deposits and withdrawals for the current date
+//     const depositInfo = deposits.filter((d) => d.date === currentDateString);
+//     const withdrawInfo = withdrawals.filter(
+//       (w) => w.date === currentDateString
+//     );
+
+//     const dayResult = calculateDayProfits(
+//       runningCapital,
+//       depositInfo,
+//       withdrawInfo
+//     );
+
+//     runningCapital = dayResult.finalBalance;
+
+//     weekdays.push({
+//       ...dayResult,
+//       date: currentDateString,
+//       withdrawals: withdrawInfo,
+//       deposits: depositInfo,
+//     });
+//   }
+
+//   // Set the last week's end date (Saturday) and final capital
+//   lastWeekEndDate = weekdays[6].date;
+//   lastWeekStartingCapital = weekdays[0].startingCapital;
+//   lastWeekFinalCapital = runningCapital;
+
+//   // Calculate weekly totals
+//   const totalFirstSignalProfit = weekdays.reduce(
+//     (sum, day) => sum + (day.firstTrade?.profit || 0),
+//     0
+//   );
+//   const totalSecondSignalProfit = weekdays.reduce(
+//     (sum, day) => sum + (day.secondTrade?.profit || 0),
+//     0
+//   );
+//   const totalSignalProfit = totalFirstSignalProfit + totalSecondSignalProfit;
+
+//   // Calculate next week details
+//   const nextWeekStartDate = new Date(lastWeekEndDate);
+//   nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 1);
+
+//   const nextWeekEndDate = new Date(nextWeekStartDate);
+//   nextWeekEndDate.setDate(nextWeekStartDate.getDate() + 6);
+
+//   // Calculate previous week details
+//   const prevWeekEndDate = new Date(startOfWeek);
+//   prevWeekEndDate.setDate(prevWeekEndDate.getDate() - 1);
+
+//   const prevWeekStartDate = new Date(prevWeekEndDate);
+//   prevWeekStartDate.setDate(prevWeekEndDate.getDate() - 6);
+
+//   return {
+//     weekdays,
+//     lastWeekEndDate,
+//     lastWeekFinalCapital,
+//     lastWeekStartingCapital,
+//     startingCapital: capital,
+//     totalDeposits: weekdays.reduce((sum, day) => sum + day.deposits.length, 0),
+//     totalWithdrawals: weekdays.reduce(
+//       (sum, day) => sum + day.withdrawals.length,
+//       0
+//     ),
+//     deposits,
+//     withdrawals,
+//     totalSignalProfit,
+//     totalFirstSignalProfit,
+//     totalSecondSignalProfit,
+//     // Add next week details
+//     nextWeekDetails: {
+//       nextWeekStartDate: formatDate(nextWeekStartDate),
+//       nextWeekEndDate: formatDate(nextWeekEndDate),
+//       nextWeekStartingCapital: lastWeekFinalCapital,
+//     },
+//     // Add previous week details
+//     prevWeekDetails: {
+//       prevWeekStartDate: formatDate(prevWeekStartDate),
+//       prevWeekEndDate: formatDate(prevWeekEndDate),
+//       prevWeekStartingCapital: 3900.0, // Default value or lookup from historical data
+//     },
+//     // Store the week's start date for reference
+//     weekStartDate,
+//   };
+// };
+
 export const generateWeeklyDays = (
   capital,
   date = new Date(),
@@ -123,6 +237,7 @@ export const generateWeeklyDays = (
   let runningCapital = capital;
   let lastWeekEndDate;
   let lastWeekFinalCapital;
+  let lastWeekStartingCapital;
 
   const weekdays = [];
 
@@ -165,6 +280,7 @@ export const generateWeeklyDays = (
 
   // Set the last week's end date (Saturday) and final capital
   lastWeekEndDate = weekdays[6].date;
+  lastWeekStartingCapital = weekdays[0].startingCapital;
   lastWeekFinalCapital = runningCapital;
 
   // Calculate weekly totals
@@ -182,6 +298,7 @@ export const generateWeeklyDays = (
     weekdays,
     lastWeekEndDate,
     lastWeekFinalCapital,
+    lastWeekStartingCapital,
     startingCapital: capital,
     totalDeposits: weekdays.reduce((sum, day) => sum + day.deposits.length, 0),
     totalWithdrawals: weekdays.reduce(
@@ -193,6 +310,7 @@ export const generateWeeklyDays = (
     totalSignalProfit,
     totalFirstSignalProfit,
     totalSecondSignalProfit,
+    weekStartDate: formatDate(startOfWeek),
   };
 };
 
