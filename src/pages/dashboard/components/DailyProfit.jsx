@@ -37,11 +37,12 @@ const Td = styled.td`
 `;
 
 const StatusIndicator = styled.span`
-  display: inline-block;
   padding: 0.15rem 0.4rem;
+  /* min-width: 140px; */
   border-radius: 0.15rem;
   font-size: 0.75rem;
   font-weight: 500;
+  flex: 1;
   letter-spacing: 0.02em;
   background-color: ${(props) => {
     switch (props.status) {
@@ -50,17 +51,23 @@ const StatusIndicator = styled.span`
       case "Done":
         return "#32cd3233"; // green with transparency
       case "Awaiting Next Signal":
-      case "Missed First Signal":
-      case "Missed Second Signal":
         return "#ff8c0033"; // orange with transparency
+      case "Missed First Signal":
+        return "#ff69b433"; // pink with transparency
+      case "Missed Second Signal":
+        return "#ffd70033"; // gold with transparency
       case "Partial Completion":
-      case "No Signals Traded":
         return "#8b451333"; // brown with transparency
-      case "Completed":
-      case "Pending":
+      case "No Signals Traded":
+        return "#9370db33"; // medium purple with transparency
       case "Active":
-      default:
+        return "#32cd3266"; // light green-gray
+      case "Completed":
+        return "#20b2aa33"; // light sea green with transparency
+      case "Pending":
         return "#77889933"; // grey with transparency
+      default:
+        return "#80808033"; // darker grey with transparency
     }
   }};
   color: ${(props) => {
@@ -70,17 +77,23 @@ const StatusIndicator = styled.span`
       case "Done":
         return "#32cd32"; // green
       case "Awaiting Next Signal":
-      case "Missed First Signal":
-      case "Missed Second Signal":
         return "#ff8c00"; // orange
+      case "Missed First Signal":
+        return "#ff69b4"; // pink
+      case "Missed Second Signal":
+        return "#ffd700"; // gold
       case "Partial Completion":
-      case "No Signals Traded":
         return "#8b4513"; // brown
-      case "Completed":
-      case "Pending":
+      case "No Signals Traded":
+        return "#9370db"; // medium purple
       case "Active":
+        return "#32cd32"; // green
+      case "Completed":
+        return "#20b2aa"; // light sea green
+      case "Pending":
+        return "#778899"; // slate grey
       default:
-        return "#778899"; // grey
+        return "#808080"; // darker grey
     }
   }};
   border: 1px solid
@@ -91,17 +104,23 @@ const StatusIndicator = styled.span`
         case "Done":
           return "#32cd3266"; // green with more opacity
         case "Awaiting Next Signal":
-        case "Missed First Signal":
-        case "Missed Second Signal":
           return "#ff8c0066"; // orange with more opacity
+        case "Missed First Signal":
+          return "#ff69b466"; // pink with more opacity
+        case "Missed Second Signal":
+          return "#ffd70066"; // gold with more opacity
         case "Partial Completion":
-        case "No Signals Traded":
           return "#8b451366"; // brown with more opacity
-        case "Completed":
-        case "Pending":
+        case "No Signals Traded":
+          return "#9370db66"; // medium purple with more opacity
         case "Active":
+          return "#32cd3266"; // green with more opacity
+        case "Completed":
+          return "#20b2aa66"; // light sea green with more opacity
+        case "Pending":
+          return "#77889966"; // slate grey with more opacity
         default:
-          return "#77889966"; // grey with more opacity
+          return "#80808066"; // darker grey with more opacity
       }
     }};
 `;
@@ -183,27 +202,27 @@ const DailyProfit = ({ formatAmount }) => {
     }
 
     // Check if we're between signals
-    if (firstSignalPassed && !secondSignalPassed) {
-      if (signals[0].traded && !signals[1].traded) {
-        return "Awaiting Next Signal";
-      } else if (!signals[0].traded) {
-        // If first signal time passed but wasn't traded
-        return "Missed First Signal";
-      }
+    if (firstSignalPassed) {
+      // if (signals[0].traded && !signals[1].traded) {
+      //   return "Awaiting Next Signal";
+      // } else if (!signals[0].traded) {
+      //   // If first signal time passed but wasn't traded
+      //   return "Missed First Signal";
+      // }
     }
 
     // After all signals have passed
     if (secondSignalPassed) {
-      if (signals[0].traded && signals[1].traded) {
-        return "Done";
-      } else if (signals[0].traded && !signals[1].traded) {
-        return "Missed Second Signal";
-      } else if (!signals[0].traded && signals[1].traded) {
-        // Unusual case but possible
-        return "Partial Completion";
-      } else {
-        return "No Signals Traded";
-      }
+      // if (signals[0].traded && signals[1].traded) {
+      //   return "Done";
+      // } else if (signals[0].traded && !signals[1].traded) {
+      //   return "Missed Second Signal";
+      // } else if (!signals[0].traded && signals[1].traded) {
+      //   // Unusual case but possible
+      //   return "Partial Completion";
+      // } else {
+      //   return "No Signals Traded";
+      // }
     }
 
     // Default case
