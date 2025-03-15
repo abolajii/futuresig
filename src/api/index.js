@@ -65,7 +65,7 @@ authFuture.interceptors.response.use(
 
         // Call verify endpoint to get a new access token
         const response = await axios.post(
-          "http://localhost:4300/api/auth/verify",
+          "https://sigfuturebe.vercel.app/api/v1/auth/verify",
           {
             accessToken: localStorage.getItem("accessToken"),
             refreshToken: refreshToken,
