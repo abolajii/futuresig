@@ -252,6 +252,7 @@ export const generateWeeklyDays = (
     const withdrawInfo = withdrawals.filter(
       (w) => w.date === currentDateString
     );
+    console.log(withdrawals);
 
     // Log deposits and withdrawals for debugging
     if (depositInfo.length > 0) {

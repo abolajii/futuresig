@@ -254,6 +254,7 @@ const DailyCard = ({
   isExpanded,
   formatAmount,
 }) => {
+  console.log(day.deposits);
   return (
     <DayCardContainer isToday={isToday}>
       <DayCardHeader onClick={() => toggleDay(day.date)}>

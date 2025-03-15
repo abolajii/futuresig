@@ -13,6 +13,7 @@ import DailyCard from "./components/DailyCard";
 import HistoricalDashboard from "./components/Historical";
 import ExpenseTracker from "./components/Expense";
 import ExpenseForm from "./components/ExpenseForm";
+import { getAllDeposits, getWithdrawal } from "../../api/request";
 
 const Container = styled.div`
   background-color: #121212;
@@ -147,6 +148,12 @@ const ToggleContainer = styled.div`
   gap: 0.5rem;
 `;
 
+const mapping = {
+  "before-trade": 0,
+  "inbetween-trade": 1,
+  "after-trade": 2,
+};
+
 const Weekly = () => {
   const [weeklyData, setWeeklyData] = useState(null);
   const { currentUser } = useContext(AuthContext);
@@ -155,6 +162,9 @@ const Weekly = () => {
   const [lastWeekStartingCapital, setLastWeekStartingCapital] = useState(0);
   const [lastWeekDate, setLastWeekDate] = useState(0);
   const [historicalWeeks, setHistoricalWeeks] = useState({});
+
+  const [deposits, setDeposits] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
 
   const [currency, setCurrency] = useState("USD");
 
@@ -169,7 +179,7 @@ const Weekly = () => {
     return `${currency === "NGN" ? "₦" : "$"}${formattedAmount}`;
   };
 
-  console.log(historicalWeeks);
+  // console.log(historicalWeeks);
 
   // In goToPreviousWeek function
   const goToPreviousWeek = () => {
@@ -188,13 +198,12 @@ const Weekly = () => {
       // If we have historical data, use that
       const previousWeekData = historicalWeeks[previousWeekStartKey];
 
-      const result =
-        generateWeeklyDays(
-          previousWeekData.startingCapital,
-          new Date(previousWeekData.weekStartDate),
-          [],
-          []
-        ) || [];
+      const result = generateWeeklyDays(
+        previousWeekData.startingCapital,
+        new Date(previousWeekData.weekStartDate),
+        deposits,
+        withdrawals
+      );
 
       setWeeklyData(result);
       setLastWeekFinalCapital(result.lastWeekFinalCapital);
@@ -202,8 +211,12 @@ const Weekly = () => {
       setLastWeekDate(result.lastWeekEndDate);
     } else {
       // If no historical data, generate new data
-      const result =
-        generateWeeklyDays(lastWeekStartingCapital, lastWeekDate, [], []) || [];
+      const result = generateWeeklyDays(
+        lastWeekStartingCapital,
+        lastWeekDate,
+        deposits,
+        withdrawals
+      );
       setWeeklyData(result);
       setLastWeekFinalCapital(result.lastWeekFinalCapital);
       setLastWeekStartingCapital(result.lastWeekStartingCapital);
@@ -223,8 +236,12 @@ const Weekly = () => {
   };
 
   const goToCurrentWeek = () => {
-    const result =
-      generateWeeklyDays(currentUser.weekly_capital, new Date(), [], []) || [];
+    const result = generateWeeklyDays(
+      currentUser.weekly_capital,
+      new Date(),
+      deposits,
+      withdrawals
+    );
     setWeeklyData(result);
     setLastWeekFinalCapital(result.lastWeekFinalCapital);
     setLastWeekStartingCapital(result.lastWeekStartingCapital);
@@ -269,14 +286,14 @@ const Weekly = () => {
       setLastWeekStartingCapital(result.lastWeekStartingCapital);
       setLastWeekDate(result.lastWeekEndDate);
     } else {
+      currentUser.weekly_capital, new Date(), deposits, withdrawals;
       // If no historical data, generate new data
-      const result =
-        generateWeeklyDays(
-          lastWeekFinalCapital,
-          addOneDay(lastWeekDate),
-          [],
-          []
-        ) || [];
+      const result = generateWeeklyDays(
+        lastWeekFinalCapital,
+        addOneDay(lastWeekDate),
+        deposits,
+        withdrawals
+      );
 
       setWeeklyData(result);
       setLastWeekFinalCapital(result.lastWeekFinalCapital);
@@ -332,6 +349,36 @@ const Weekly = () => {
     });
   };
 
+  const fetchDeposits = async () => {
+    try {
+      const response = await getAllDeposits();
+      const withdrawResponse = await getWithdrawal();
+
+      const formattedExpenses = withdrawResponse.data.map((e) => ({
+        date: e.date.split("T")[0],
+        amount: e.amount,
+        whenWithdraw: mapping[e.whenWithdraw],
+        id: e._id,
+      }));
+
+      const formattedDeposits = response.data?.map((d) => ({
+        date: d.date.split("T")[0],
+        amount: d.amount,
+        bonus: d.bonus,
+        whenDeposited: mapping[d.whenDeposited],
+      }));
+
+      setDeposits(formattedDeposits);
+      setWithdrawals(formattedExpenses);
+    } catch (error) {
+      console.error("Error fetching deposits:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeposits();
+  }, []);
+
   const handleCurrencyToggle = (newCurrency) => {
     setCurrency(newCurrency);
   };
@@ -339,11 +386,23 @@ const Weekly = () => {
   const formattedStartDate = formatDate(weeklyData?.weekdays[0]?.date);
   const formattedEndDate = formatDate(weeklyData?.weekdays[6]?.date);
 
-  console.log(weeklyData);
+  // useEffect(() => {
+  //   const result = generateWeeklyDays(
+  //     currentUser.weekly_capital,
+  //     new Date(),
+  //     deposits,
+  //     withdrawals
+  //   );
+  //   setWeeklyData(result);
+  // }, [withdrawals]);
 
   useEffect(() => {
-    const result =
-      generateWeeklyDays(currentUser.weekly_capital, new Date(), [], []) || [];
+    const result = generateWeeklyDays(
+      currentUser.weekly_capital,
+      new Date(),
+      deposits,
+      withdrawals
+    );
     setWeeklyData(result);
     setLastWeekFinalCapital(result.lastWeekFinalCapital);
     setLastWeekStartingCapital(result.lastWeekStartingCapital);
@@ -359,7 +418,7 @@ const Weekly = () => {
     };
 
     setHistoricalWeeks(initialHistorical);
-  }, []);
+  }, [deposits]);
 
   const dateRange = `${formattedStartDate} - ${formattedEndDate}`;
   return (
@@ -509,7 +568,7 @@ const Weekly = () => {
                   </span>
                 </div>
 
-                <div
+                {/* <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
@@ -545,7 +604,7 @@ const Weekly = () => {
                     )}
                     )
                   </span>
-                </div>
+                </div> */}
 
                 <div
                   style={{

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
 import { generateWeeklyDays } from "../../../utils";
 import { AuthContext } from "../../../context/AuthContext";
+import { getAllDeposits, getWithdrawal } from "../../../api/request";
 
 const TableContainer = styled.div`
   border-radius: 0.5rem;
@@ -125,9 +126,48 @@ const StatusIndicator = styled.span`
     }};
 `;
 
+const mapping = {
+  "before-trade": 0,
+  "inbetween-trade": 1,
+  "after-trade": 2,
+};
+
 const DailyProfit = ({ formatAmount }) => {
   const [weeklyData, setWeeklyData] = useState(null);
   const { currentUser } = useContext(AuthContext);
+
+  const [deposits, setDeposits] = useState([]);
+  const [withdrawals, setWithdrawals] = useState([]);
+
+  const fetchDeposits = async () => {
+    try {
+      const response = await getAllDeposits();
+      const withdrawResponse = await getWithdrawal();
+
+      const formattedExpenses = withdrawResponse.data.map((e) => ({
+        date: e.date.split("T")[0],
+        amount: e.amount,
+        whenWithdraw: mapping[e.whenWithdraw],
+        id: e._id,
+      }));
+
+      const formattedDeposits = response.data?.map((d) => ({
+        date: d.date.split("T")[0],
+        amount: d.amount,
+        bonus: d.bonus,
+        whenDeposited: mapping[d.whenDeposited],
+      }));
+
+      setDeposits(formattedDeposits);
+      setWithdrawals(formattedExpenses);
+    } catch (error) {
+      console.error("Error fetching deposits:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeposits();
+  }, []);
 
   const [signals, setSignals] = useState([
     {
@@ -157,10 +197,14 @@ const DailyProfit = ({ formatAmount }) => {
   ]);
 
   useEffect(() => {
-    const result =
-      generateWeeklyDays(currentUser.weekly_capital, new Date(), [], []) || [];
+    const result = generateWeeklyDays(
+      currentUser.weekly_capital,
+      new Date(),
+      deposits,
+      withdrawals
+    );
     setWeeklyData(result);
-  }, []);
+  }, [withdrawals]);
 
   const getStatus = (dayDate) => {
     const today = new Date();
@@ -230,6 +274,8 @@ const DailyProfit = ({ formatAmount }) => {
   };
 
   const result = weeklyData?.weekdays;
+
+  console.log(result);
 
   function formatDate(dateString) {
     const date = new Date(dateString);

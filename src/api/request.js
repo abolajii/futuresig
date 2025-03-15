@@ -18,9 +18,18 @@ export const getRevenue = async () => {
   }
 };
 
-export const getExpenses = async () => {
+export const getAllDeposits = async () => {
   try {
-    // const response = await authFuture.get("/withdraw");
+    const response = await authFuture.get("/deposit");
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const getWithdrawal = async () => {
+  try {
+    const response = await authFuture.get("/withdrawal");
     return response.data;
   } catch (error) {
     throw error.response.data;
