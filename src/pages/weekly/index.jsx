@@ -7,7 +7,7 @@ import {
   ChevronRight,
   Clock,
 } from "react-feather";
-import { addOneDay, generateWeeklyDays } from "../../utils";
+import { addOneDay, formatISODate, generateWeeklyDays } from "../../utils";
 import { AuthContext } from "../../context/AuthContext";
 import DailyCard from "./components/DailyCard";
 import HistoricalDashboard from "./components/Historical";
@@ -313,31 +313,18 @@ const Weekly = () => {
     }
   };
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
+  function formatDate(date) {
+    // Ensure we're passing in a Date object
+    const d = new Date(date);
 
-    // Get day of month (1-31)
-    const day = date.getDate();
+    // Get year, month and day in local timezone
+    const year = d.getFullYear();
+    // getMonth() returns 0-11, so add 1
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
 
-    // Add ordinal suffix (st, nd, rd, th)
-    let suffix = "th";
-    if (day % 10 === 1 && day !== 11) {
-      suffix = "st";
-    } else if (day % 10 === 2 && day !== 12) {
-      suffix = "nd";
-    } else if (day % 10 === 3 && day !== 13) {
-      suffix = "rd";
-    }
-
-    // Format with weekday, month name, day with ordinal suffix, and year
-    return date
-      .toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-        year: "numeric",
-      })
-      .replace(/\d+/, day + suffix);
+    // Format as YYYY-MM-DD
+    return `${year}-${month}-${day}`;
   }
 
   const result = weeklyData?.weekdays;
@@ -383,18 +370,8 @@ const Weekly = () => {
     setCurrency(newCurrency);
   };
 
-  const formattedStartDate = formatDate(weeklyData?.weekdays[0]?.date);
-  const formattedEndDate = formatDate(weeklyData?.weekdays[6]?.date);
-
-  // useEffect(() => {
-  //   const result = generateWeeklyDays(
-  //     currentUser.weekly_capital,
-  //     new Date(),
-  //     deposits,
-  //     withdrawals
-  //   );
-  //   setWeeklyData(result);
-  // }, [withdrawals]);
+  const formattedStartDate = formatISODate(weeklyData?.weekdays[0]?.date);
+  const formattedEndDate = formatISODate(weeklyData?.weekdays[6]?.date);
 
   useEffect(() => {
     const result = generateWeeklyDays(
@@ -421,6 +398,7 @@ const Weekly = () => {
   }, [deposits]);
 
   const dateRange = `${formattedStartDate} - ${formattedEndDate}`;
+
   return (
     <Container>
       <Header>
@@ -567,44 +545,6 @@ const Weekly = () => {
                     {formatAmount(weeklyData.totalSignalProfit)}
                   </span>
                 </div>
-
-                {/* <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    borderTop: "1px solid #2c2c2c",
-                    paddingTop: "10px",
-                    marginTop: "5px",
-                  }}
-                >
-                  <span>Deposits:</span>
-                  <span>
-                    {weeklyData.totalDeposits} (
-                    {formatAmount(
-                      weeklyData.deposits.reduce(
-                        (sum, deposit) => sum + deposit.amount,
-                        0
-                      )
-                    )}
-                    )
-                  </span>
-                </div>
-
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span>Withdrawals:</span>
-                  <span>
-                    {weeklyData.totalWithdrawals} (
-                    {formatAmount(
-                      weeklyData.withdrawals.reduce(
-                        (sum, withdrawal) => sum + withdrawal.amount,
-                        0
-                      )
-                    )}
-                    )
-                  </span>
-                </div> */}
 
                 <div
                   style={{

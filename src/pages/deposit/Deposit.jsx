@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from "react";
-
 import styled from "styled-components";
-import { getAllDeposits } from "../../api/request";
-import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+// import { formatValue } from "../utils/tradingUtils";
 import Modal from "./components/Modal";
 import DepositForm from "./components/DepositForm";
 import DeleteModal from "./components/DeleteModal";
-import { formatDate, formatISODate } from "../../utils";
+import { useNavigate } from "react-router-dom";
+import { formatDate } from "../../utils";
+
+const PageTitle = styled.h1`
+  font-size: 1.5rem;
+  color: #ffffff;
+  margin-bottom: 2rem;
+  font-weight: 600;
+`;
 
 const Header = styled.div`
   display: flex;
@@ -193,14 +200,12 @@ const CurrencyToggle = styled.button`
   }
 `;
 
-const Bottom = styled.div``;
-
 const Deposit = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [deposits, setDeposits] = useState([]);
-  // const { setUser, user } = useAuthStore();
+  const { setUser, user } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [selectedDeposit, setSelectedDeposit] = useState(null);
@@ -208,11 +213,15 @@ const Deposit = () => {
   const fetchDeposits = async () => {
     try {
       const response = await getAllDeposits();
-      setDeposits(response.data);
+      setDeposits(response.deposits);
     } catch (error) {
       console.error("Error fetching deposits:", error);
     }
   };
+
+  useEffect(() => {
+    fetchDeposits();
+  }, []);
 
   const handleCreateDeposit = () => {
     setIsModalOpen(true);
@@ -226,23 +235,9 @@ const Deposit = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchDeposits();
-  }, []);
-
-  const formatValue = (value = 0, nairaRate = 1550) => {
-    const options = {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    };
-
-    const amount = currency === "NGN" ? value * nairaRate : value;
-    const formattedAmount = amount.toLocaleString("en-US", options);
-    return `${currency === "NGN" ? "₦" : "$"}${formattedAmount}`;
-  };
-
   return (
     <div>
+      {/* <PageTitle>Deposits</PageTitle> */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
@@ -252,32 +247,33 @@ const Deposit = () => {
       >
         <DepositForm fetchDeposits={fetchDeposits} />
       </Modal>
-      <Header>
-        <DeleteModal
-          isOpen={deleteModalOpen}
-          onClose={() => {
+
+      <DeleteModal
+        isOpen={deleteModalOpen}
+        onClose={() => {
+          setDeleteModalOpen(false);
+        }}
+        onConfirm={async () => {
+          try {
+            const response = await deleteDeposit(selectedDeposit._id);
+            console.log(response);
+
+            const clonedDeposits = [...deposits];
+            const index = clonedDeposits.findIndex(
+              (d) => d._id === selectedDeposit._id
+            );
             setDeleteModalOpen(false);
-          }}
-          onConfirm={async () => {
-            try {
-              const response = await deleteDeposit(selectedDeposit._id);
-              console.log(response);
+            clonedDeposits.splice(index, 1);
+            setDeposits(clonedDeposits);
 
-              const clonedDeposits = [...deposits];
-              const index = clonedDeposits.findIndex(
-                (d) => d._id === selectedDeposit._id
-              );
-              setDeleteModalOpen(false);
-              clonedDeposits.splice(index, 1);
-              setDeposits(clonedDeposits);
-
-              // const startingCapital = response.data.startingCapital;
-              // const updatedUser = { ...user, startingCapital };
-              setUser(updatedUser);
-            } catch (error) {}
-          }}
-          itemName={selectedDeposit?.amount}
-        />
+            const startingCapital = response.data.startingCapital;
+            const updatedUser = { ...user, startingCapital };
+            setUser(updatedUser);
+          } catch (error) {}
+        }}
+        itemName={selectedDeposit?.amount}
+      />
+      <Header>
         <FilterSection>
           <DateInputGroup>
             <DateInputWrapper>
@@ -312,6 +308,7 @@ const Deposit = () => {
           </Button>
         </div>
       </Header>
+
       <TableContainer>
         <Table>
           <thead>
@@ -328,9 +325,9 @@ const Deposit = () => {
               deposits.map((deposit) => (
                 <tr key={deposit._id}>
                   <Td>
-                    <Amount>{formatValue(deposit.amount)}</Amount>
+                    <Amount>{formatValue(deposit.amount, currency)}</Amount>
                   </Td>
-                  <Td>{formatISODate(new Date(deposit.date))}</Td>
+                  <Td>{formatDate(new Date(deposit.date), "MMM dd, yyyy")}</Td>
                   <Td>
                     <TradeTime>
                       {deposit?.whenDeposited?.split("-").join(" ")}

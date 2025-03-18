@@ -36,6 +36,24 @@ export const getWithdrawal = async () => {
   }
 };
 
+export const deleteDeposit = async (id) => {
+  try {
+    const response = await authFuture.delete(`/delete/deposit/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const deleteWithdrawal = async (id) => {
+  try {
+    const response = await authFuture.delete(`/delete/withdrawal/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
 export const getStats = async () => {
   try {
     const response = await authFuture.get("/signal/stats");
@@ -43,6 +61,15 @@ export const getStats = async () => {
   } catch (error) {
     console.log(error);
     // throw error.response.data;
+  }
+};
+
+export const addDeposit = async (data) => {
+  try {
+    const response = await authFuture.post("/add/deposit", data);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
   }
 };
 
