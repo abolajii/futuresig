@@ -265,11 +265,11 @@ const DailyCard = ({
         </DayCardDate>
         <DayCardMetrics>
           <DayMetric>
-            <DollarSign size={16} color="#adb5bd" />
+            {/* <DollarSign size={16} color="#adb5bd" /> */}
             <MetricValue>{formatAmount(day.startingCapital)}</MetricValue>
           </DayMetric>
           <DayMetric>
-            <DollarSign size={16} color="#adb5bd" />
+            {/* <DollarSign size={16} color="#adb5bd" /> */}
             <MetricValue>{formatAmount(day.finalBalance)}</MetricValue>
           </DayMetric>
           <DayMetric>
