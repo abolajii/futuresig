@@ -191,9 +191,9 @@ const DepositForm = ({ fetchDeposits, onClose }) => {
   const [success, setSuccess] = useState("");
 
   const radioOptions = [
-    { value: "before-trade", label: "Before Trade", color: "#4CAF50" },
-    { value: "inbetween-trade", label: "During Trade", color: "#2196F3" },
-    { value: "after-trade", label: "After Trade", color: "#9C27B0" },
+    { value: 0, label: "Before Trade", color: "#4CAF50" },
+    { value: 1, label: "During Trade", color: "#2196F3" },
+    { value: 2, label: "After Trade", color: "#9C27B0" },
   ];
 
   const validateForm = () => {

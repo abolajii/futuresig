@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import styled from "styled-components";
-import { getAllDeposits } from "../../api/request";
+import { getAllDeposits, deleteDeposit } from "../../api/request";
 import { useNavigate } from "react-router-dom";
 import Modal from "./components/Modal";
 import DepositForm from "./components/DepositForm";
@@ -195,6 +195,12 @@ const CurrencyToggle = styled.button`
 
 const Bottom = styled.div``;
 
+const tradeTime = {
+  0: "Before trade",
+  1: "During trade",
+  2: "After trade",
+};
+
 const Deposit = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -219,7 +225,8 @@ const Deposit = () => {
   };
 
   const handleDelete = (deposit) => {
-    console.log("Delete deposit:", deposit);
+    // console.log("Delete deposit:", deposit);
+    // await deleteDeposit(deposit._id);
     setDeleteModalOpen(true);
     setSelectedDeposit(deposit);
   };
@@ -248,7 +255,6 @@ const Deposit = () => {
         onClose={() => {
           setIsModalOpen(false);
         }}
-        f
       >
         <DepositForm fetchDeposits={fetchDeposits} />
       </Modal>
@@ -260,9 +266,7 @@ const Deposit = () => {
           }}
           onConfirm={async () => {
             try {
-              const response = await deleteDeposit(selectedDeposit._id);
-              console.log(response);
-
+              await deleteDeposit(selectedDeposit._id);
               const clonedDeposits = [...deposits];
               const index = clonedDeposits.findIndex(
                 (d) => d._id === selectedDeposit._id
@@ -270,10 +274,6 @@ const Deposit = () => {
               setDeleteModalOpen(false);
               clonedDeposits.splice(index, 1);
               setDeposits(clonedDeposits);
-
-              // const startingCapital = response.data.startingCapital;
-              // const updatedUser = { ...user, startingCapital };
-              setUser(updatedUser);
             } catch (error) {}
           }}
           itemName={selectedDeposit?.amount}
@@ -332,9 +332,7 @@ const Deposit = () => {
                   </Td>
                   <Td>{formatISODate(new Date(deposit.date))}</Td>
                   <Td>
-                    <TradeTime>
-                      {deposit?.whenDeposited?.split("-").join(" ")}
-                    </TradeTime>
+                    <TradeTime>{tradeTime[deposit?.whenDeposited]}</TradeTime>
                   </Td>
                   <Td>
                     <Status status={deposit.status || "completed"}>

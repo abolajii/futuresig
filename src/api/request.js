@@ -38,7 +38,7 @@ export const getWithdrawal = async () => {
 
 export const deleteDeposit = async (id) => {
   try {
-    const response = await authFuture.delete(`/delete/deposit/${id}`);
+    const response = await authFuture.delete(`/deposit/${id}`);
     return response.data;
   } catch (error) {
     throw error.response.data;
