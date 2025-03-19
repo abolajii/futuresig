@@ -11,6 +11,7 @@ import Profile from "./pages/profile";
 import Trade from "./pages/trade";
 import Dashboard from "./pages/dashboard";
 import { AuthContext } from "./context/AuthContext";
+import DepositProgress from "./pages/deposit/components/DepositProgress";
 
 const App = () => {
   const { currentUser } = useContext(AuthContext);
@@ -38,6 +39,14 @@ const App = () => {
         element={
           <PrivateRoute>
             <Weekly />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/doubling"
+        element={
+          <PrivateRoute>
+            <DepositProgress />
           </PrivateRoute>
         }
       />
